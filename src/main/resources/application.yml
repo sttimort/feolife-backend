@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:15432/feolife
+    username: feolife
+    password: feolife
+
+logging:
+  level:
+    root: debug

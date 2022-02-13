@@ -1,0 +1,16 @@
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.gradletasknamecache
+local-properties-overrides.yml
+local-test-properties-overrides.yml
+
+log/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+.DS_Store
