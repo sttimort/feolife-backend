@@ -1,4 +1,4 @@
-package dead.souls.feolife.dao.model
+package dead.souls.feolife.model
 
 data class UsernamePasswordCredentials(
     val username: String,

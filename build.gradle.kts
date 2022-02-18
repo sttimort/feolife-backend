@@ -36,6 +36,7 @@ dependencies {
 
     implementation("io.github.microutils:kotlin-logging:1.12.5")
     implementation("io.konform:konform:0.3.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
 }
 
 tasks.withType<KotlinCompile> {

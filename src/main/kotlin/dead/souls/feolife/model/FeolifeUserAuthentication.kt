@@ -1,11 +1,11 @@
 package dead.souls.feolife.model
 
 import org.springframework.security.core.Authentication
-import java.util.UUID
 
 data class FeolifeUserAuthentication(
     val base: Authentication,
-    private val userProfileUuid: UUID,
+    private val principal: FeolifePrincipal,
 ) : Authentication by base {
-    override fun getPrincipal(): UUID = userProfileUuid
+    override fun getPrincipal(): FeolifePrincipal = principal
+    override fun getAuthorities() = principal.permissions.map { it.grantedAuthority }
 }

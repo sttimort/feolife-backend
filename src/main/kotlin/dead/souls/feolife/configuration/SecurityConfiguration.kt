@@ -1,10 +1,14 @@
 package dead.souls.feolife.configuration
 
 import dead.souls.feolife.filter.AuthenticatedUserEnrichmentFilter
+import dead.souls.feolife.model.Permission
+import dead.souls.feolife.model.Permission.BILLING_ACCOUNT_FILL_UP
+import dead.souls.feolife.model.Permission.LOGIN
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.web.servlet.AuthorizeRequestsDsl
 import org.springframework.security.config.web.servlet.invoke
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
@@ -51,11 +55,13 @@ class SecurityConfiguration(
         authorizeRequests {
             authorize("/username-password-profiles", permitAll)
 
-            authorize("/auth", authenticated)
+            authorize("/auth", hasPermission(LOGIN))
             authorize("/user-profile", authenticated)
 
-            authorize("/jwt-protected", authenticated)
+            authorize("/billing-accounts/*/fill-ups", hasPermission(BILLING_ACCOUNT_FILL_UP))
         }
     }
 }
+
+private fun AuthorizeRequestsDsl.hasPermission(permission: Permission) = hasAuthority(permission.name)
 

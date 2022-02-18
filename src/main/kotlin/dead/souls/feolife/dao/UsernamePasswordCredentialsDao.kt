@@ -1,6 +1,6 @@
 package dead.souls.feolife.dao
 
-import dead.souls.feolife.dao.model.UsernamePasswordCredentials
+import dead.souls.feolife.model.UsernamePasswordCredentials
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -45,10 +45,10 @@ class UsernamePasswordCredentialsDao(
         template
             .queryForObject(
                 """
-            INSERT INTO username_password_credentials (username, password, user_profile_id)
-            VALUES (:${Params.USERNAME}, :${Params.PASSWORD}, :${Params.USER_PROFILE_ID})
-            RETURNING id
-            """.trimIndent(),
+                INSERT INTO username_password_credentials (username, password, user_profile_id)
+                VALUES (:${Params.USERNAME}, :${Params.PASSWORD}, :${Params.USER_PROFILE_ID})
+                RETURNING id
+                """.trimIndent(),
                 mapOf(
                     Params.USERNAME to username,
                     Params.PASSWORD to password,

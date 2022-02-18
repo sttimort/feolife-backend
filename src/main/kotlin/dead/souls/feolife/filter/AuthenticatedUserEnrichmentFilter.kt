@@ -2,6 +2,8 @@ package dead.souls.feolife.filter
 
 import dead.souls.feolife.dao.UserProfileDao
 import dead.souls.feolife.model.FeolifeUserAuthentication
+import dead.souls.feolife.model.FeolifePrincipal
+import dead.souls.feolife.service.FeolifeJwtClaimNames
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -50,13 +52,19 @@ class AuthenticatedUserEnrichmentFilter(
                 "Invalid UsernamePasswordAuthentication $authentication: principal is not UserDetails"
             )
 
-        val userProfileUuid = userDetails.username
-            ?.let { userProfileDao.findUserProfileUuidByUsername(it) }
+        val principal = userDetails.username
+            ?.let { userProfileDao.findUserProfileUuidWithPermissionsByUsername(it) }
+            ?.let { (userProfileUuid, permissions) ->
+                FeolifePrincipal(userProfileUuid = userProfileUuid, permissions = permissions)
+            }
             ?: throw IllegalStateException(
                 "UserProfile not found by username ${userDetails.username} from $authentication"
             )
 
-        return FeolifeUserAuthentication(base = authentication, userProfileUuid = userProfileUuid)
+        return FeolifeUserAuthentication(
+            base = authentication,
+            principal = principal
+        )
     }
 
     private fun enrichJwtAuthentication(authentication: JwtAuthenticationToken): FeolifeUserAuthentication {
@@ -64,6 +72,13 @@ class AuthenticatedUserEnrichmentFilter(
             ?.let { it as? Jwt }
             ?: throw IllegalStateException("Invalid JwtAuthenticationToken $authentication: principal is not Jwt")
 
-        return FeolifeUserAuthentication(base = authentication, userProfileUuid = UUID.fromString(jwt.subject))
+        return FeolifeUserAuthentication(
+            base = authentication,
+            principal = FeolifePrincipal(
+                userProfileUuid = UUID.fromString(jwt.subject),
+                permissions = jwt.getClaimAsStringList(FeolifeJwtClaimNames.PERMISSIONS)
+                    .map { enumValueOf(it) }
+            )
+        )
     }
 }
