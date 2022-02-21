@@ -28,6 +28,7 @@ class AuthenticatedUserEnrichmentFilter(
     ) {
         SecurityContextHolder.getContext()?.authentication?.let { authentication ->
             val enrichedAuthentication: FeolifeUserAuthentication? = when (authentication) {
+                is FeolifeUserAuthentication -> authentication
                 is UsernamePasswordAuthenticationToken -> enrichUsernamePasswordAuthentication(authentication)
                 is JwtAuthenticationToken -> enrichJwtAuthentication(authentication)
                 is AnonymousAuthenticationToken -> null

@@ -10,7 +10,7 @@ import dead.souls.feolife.exception.FeolifeStatusNotFoundException
 import dead.souls.feolife.logger
 import dead.souls.feolife.model.UserProfile
 import dead.souls.feolife.model.request.CreateUserProfileWithUsernamePasswordCredentialsRequest
-import dead.souls.feolife.model.response.GetUserProfileCommonDataSetResponse
+import dead.souls.feolife.model.response.GetMyUserProfileResponse
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -27,20 +27,21 @@ class UserProfileManager(
 ) {
     private val passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
 
-    fun getUserProfileCommonDataSet(userProfileUuid: UUID): GetUserProfileCommonDataSetResponse = userProfileDao
-        .findUserProfileByUuid(userProfileUuid)
-        ?.let { userProfile ->
-            GetUserProfileCommonDataSetResponse(
-                uuid = userProfile.uuid,
-                firstName = userProfile.firstName,
-                lastName = userProfile.lastName,
-                middleName = userProfile.middleName,
-                credentials = usernamePasswordCredentialsDao.findAllWithUserProfileId(userProfile.id).map {
-                    GetUserProfileCommonDataSetResponse.UsernameCredentials(it.username)
-                }
-            )
-        }
-        ?: throw FeolifeStatusNotFoundException(responseErrorMessage = "UserProfile with uuid $userProfileUuid not found")
+    fun handleGetMyUserProfileRequest(userProfileUuid: UUID): GetMyUserProfileResponse {
+        val userProfile = getUserProfileOrThrow(userProfileUuid)
+        val permissions = userProfileDao.findUserProfilePermissions(userProfileUuid)
+
+        return GetMyUserProfileResponse(
+            uuid = userProfile.uuid,
+            firstName = userProfile.firstName,
+            lastName = userProfile.lastName,
+            middleName = userProfile.middleName,
+            credentials = usernamePasswordCredentialsDao.findAllWithUserProfileId(userProfile.id).map {
+                GetMyUserProfileResponse.UsernameCredentials(it.username)
+            },
+            permissions = permissions,
+        )
+    }
 
     @Transactional
     fun createUserProfile(request: CreateUserProfileWithUsernamePasswordCredentialsRequest) {
@@ -93,6 +94,11 @@ class UserProfileManager(
             throw UsernameAlreadyRegisteredException(username)
         }
     }
+
+    private fun getUserProfileOrThrow(userProfileUuid: UUID) =
+        userProfileDao
+            .findUserProfileByUuid(userProfileUuid)
+            ?: throw FeolifeStatusNotFoundException(responseErrorMessage = "UserProfile with uuid $userProfileUuid not found")
 
     companion object {
         private val log by logger()

@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus
 
 open class FeolifeStatusConflictException(
     responseErrorMessage: String,
-    message: String,
+    message: String = responseErrorMessage,
 ) : FeolifeStatusCodeException(
     status = HttpStatus.CONFLICT,
     responseErrorMessage = responseErrorMessage,

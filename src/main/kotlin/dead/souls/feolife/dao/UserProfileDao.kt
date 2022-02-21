@@ -35,6 +35,18 @@ class UserProfileDao(
             UserProfileUuidWithPermissionsResultSetExtractor
         )
 
+    fun findUserProfilePermissions(userProfileUuid: UUID): List<Permission> = template
+        .query(
+            """
+            SELECT role_permission.permission AS ${Params.PERMISSION} FROM user_profile
+                JOIN user_role ON user_profile.id = user_role.user_profile_id
+                JOIN role_permission ON user_role.role_id = role_permission.role_id
+            WHERE user_profile.uuid = :${Params.UUID}
+            """.trimIndent(),
+            mapOf(Params.UUID to userProfileUuid)
+        ) { rs, _ -> enumValueOf<Permission>(rs.getString(Params.PERMISSION)) }
+        .toList()
+
     fun findUserProfileByUuid(uuid: UUID): UserProfile? = template
         .query(
             "SELECT $ALL_USER_PROFILE_FIELDS FROM user_profile WHERE uuid = :${Params.UUID}",
