@@ -3,8 +3,11 @@ package dead.souls.feolife.configuration
 import dead.souls.feolife.filter.AuthenticatedUserEnrichmentFilter
 import dead.souls.feolife.model.Permission
 import dead.souls.feolife.model.Permission.BILLING_ACCOUNT_FILL_UP
+import dead.souls.feolife.model.Permission.CHANGE_ROLE_PERMISSIONS
 import dead.souls.feolife.model.Permission.CREATE_ROLE
+import dead.souls.feolife.model.Permission.DELETE_ROLE
 import dead.souls.feolife.model.Permission.LIST_ROLES
+import dead.souls.feolife.model.Permission.LIST_ROLE_PERMISSIONS
 import dead.souls.feolife.model.Permission.LOGIN
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -35,7 +38,11 @@ class SecurityConfiguration(
 
         cors {
             configurationSource = UrlBasedCorsConfigurationSource().apply {
-                registerCorsConfiguration("/**", CorsConfiguration().apply { applyPermitDefaultValues() })
+                registerCorsConfiguration("/**", CorsConfiguration().apply {
+                    applyPermitDefaultValues()
+                    addAllowedMethod(HttpMethod.PUT)
+                    addAllowedMethod(HttpMethod.DELETE)
+                })
             }
         }
 
@@ -61,8 +68,13 @@ class SecurityConfiguration(
             authorize("/auth", hasPermission(LOGIN))
             authorize("/my-user-profile", authenticated)
 
+            // roles
             authorize(HttpMethod.GET, "/roles", hasPermission(LIST_ROLES))
             authorize(HttpMethod.POST, "/roles", hasPermission(CREATE_ROLE))
+            authorize(HttpMethod.DELETE, "/roles/*", hasPermission(DELETE_ROLE))
+            authorize(HttpMethod.GET, "/roles/*/permissions", hasPermission(LIST_ROLE_PERMISSIONS))
+            authorize(HttpMethod.PUT, "/roles/*/permissions", hasPermission(CHANGE_ROLE_PERMISSIONS))
+
             authorize("/billing-accounts/*/fill-ups", hasPermission(BILLING_ACCOUNT_FILL_UP))
         }
     }

@@ -35,6 +35,7 @@ CREATE SEQUENCE IF NOT EXISTS role_id_sequence AS bigint INCREMENT 1 MINVALUE 1 
 CREATE TABLE IF NOT EXISTS role
 (
     id                              bigint PRIMARY KEY    default nextval('role_id_sequence'),
+    uuid                            uuid         NOT NULL UNIQUE,
     name                            varchar(128) NOT NULL UNIQUE,
     is_assigned_on_profile_creation bool         NOT NULL DEFAULT false
 );
@@ -48,8 +49,8 @@ CREATE TABLE IF NOT EXISTS user_role
 
 CREATE TABLE IF NOT EXISTS role_permission
 (
-    role_id    bigint REFERENCES role NOT NULL,
-    permission varchar(128)           NOT NULL,
+    role_id    bigint       NOT NULL REFERENCES role ON DELETE cascade,
+    permission varchar(128) NOT NULL,
     primary key (role_id, permission)
 );
 

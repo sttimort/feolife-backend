@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 
 @ControllerAdvice
 class CommonControllerAdvice {
@@ -73,6 +74,16 @@ class CommonControllerAdvice {
             .also {
                 log.error(exception) { "Responding with $it" }
             }
+
+    @ExceptionHandler
+    fun methodArgumentTypeMismatchExceptionHandler(
+        exception: MethodArgumentTypeMismatchException
+    ): ResponseEntity<FeolifeErrorResponse> {
+        val response = ResponseEntity.badRequest().body(FeolifeErrorResponse("Invalid request parameters"))
+
+        log.info(exception) { "Responding with $response" }
+        return response
+    }
 
     @ExceptionHandler
     fun exceptionHandler(exception: Exception): ResponseEntity<FeolifeErrorResponse> =

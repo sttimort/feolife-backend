@@ -11,6 +11,12 @@ enum class Permission {
     // roles
     LIST_ROLES,
     CREATE_ROLE,
+    DELETE_ROLE,
+    ASSIGN_ROLES,
+
+    // role permissions
+    LIST_ROLE_PERMISSIONS,
+    CHANGE_ROLE_PERMISSIONS,
 
     QUERY_BILLING_ACCOUNT,
     VIEW_BILLING_ACCOUNT_BALANCE,

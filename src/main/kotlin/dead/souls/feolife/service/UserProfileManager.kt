@@ -27,8 +27,15 @@ class UserProfileManager(
 ) {
     private val passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
 
+    fun getUserProfileByUuidOrThrow(userProfileUuid: UUID): UserProfile =
+        userProfileDao
+            .findUserProfileByUuid(userProfileUuid)
+            ?: throw FeolifeStatusNotFoundException(
+                responseErrorMessage = "UserProfile with uuid $userProfileUuid not found"
+            )
+
     fun handleGetMyUserProfileRequest(userProfileUuid: UUID): GetMyUserProfileResponse {
-        val userProfile = getUserProfileOrThrow(userProfileUuid)
+        val userProfile = getUserProfileByUuidOrThrow(userProfileUuid)
         val permissions = userProfileDao.findUserProfilePermissions(userProfileUuid)
 
         return GetMyUserProfileResponse(
@@ -94,11 +101,6 @@ class UserProfileManager(
             throw UsernameAlreadyRegisteredException(username)
         }
     }
-
-    private fun getUserProfileOrThrow(userProfileUuid: UUID) =
-        userProfileDao
-            .findUserProfileByUuid(userProfileUuid)
-            ?: throw FeolifeStatusNotFoundException(responseErrorMessage = "UserProfile with uuid $userProfileUuid not found")
 
     companion object {
         private val log by logger()

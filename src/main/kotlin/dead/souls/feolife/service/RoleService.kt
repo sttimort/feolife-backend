@@ -6,17 +6,21 @@ import dead.souls.feolife.exception.FeolifeStatusConflictException
 import dead.souls.feolife.logger
 import dead.souls.feolife.model.Permission
 import dead.souls.feolife.model.Role
+import dead.souls.feolife.model.request.AssignRolesRequest
 import dead.souls.feolife.model.request.CreateRoleRequest
+import dead.souls.feolife.model.request.SetRolePermissionsRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @Service
 class RoleService(
+    private val userProfileManager: UserProfileManager,
     private val roleDao: RoleDao,
 ) {
     fun getRoles(): List<Role> = roleDao.getRoles()
 
-    fun getRolePermissions(roleName: String): List<Permission> = roleDao.getRolePermissions(roleName)
+    fun getRolePermissionsByRoleUuid(roleUuid: UUID): List<Permission> = roleDao.getRolePermissionsByRoleUuid(roleUuid)
 
     @Transactional
     fun handleCreateRoleRequest(request: CreateRoleRequest) {
@@ -25,9 +29,18 @@ class RoleService(
         log.debug { "Created role $role with permissions ${request.permissions}" }
     }
 
+    fun handleSetRolePermissionsRequest(roleUuid: UUID, request: SetRolePermissionsRequest) {
+        roleDao.setRolePermissionsByRoleUuid(roleUuid, request.permissions)
+    }
+
+    fun deleteRoleByUuid(roleUuid: UUID) {
+        roleDao.deleteRoleByUuid(roleUuid)
+    }
+
     private fun createRoleOrThrow(request: CreateRoleRequest) = try {
         roleDao.createRole(
-            name = request.name,
+            uuid = UUID.randomUUID(),
+            name = request.name.trim(),
             isAssignedOnUserProfileCreation = request.isAssignedOnUserProfileCreation,
         )
     } catch (e: DuplicateRoleNameException) {
